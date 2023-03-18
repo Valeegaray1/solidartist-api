@@ -1,5 +1,13 @@
 const express = require('express')
-const { sequelize, Category, ArtPiece, UserPiece, CategoryPiece, CollectionPiece, Collection } = require('../models/index')
+const {
+    sequelize,
+    Category,
+    ArtPiece,
+    UserPiece,
+    CategoryPiece,
+    CollectionPiece,
+    Collection
+} = require('../models/index')
 const multer = require('multer');
 
 const router = express.Router();
@@ -13,65 +21,137 @@ const storage = multer.diskStorage({
     }
 })
 
-const upload = multer({ storage: storage }).array('files');
+const upload = multer({
+    storage: storage
+}).array('files');
 
 //GET ALL CATEGORIES
 router.get('/categories/all', (req, res) => {
     Category.findAll()
-        .then(resp => res.status(200).json({ ok: true, data: resp }))
-        .catch(err => res.status(400).json({ ok: false, data: err }))
+        .then(resp => res.status(200).json({
+            ok: true,
+            data: resp
+        }))
+        .catch(err => res.status(400).json({
+            ok: false,
+            data: err
+        }))
 })
 
 //GET ALL ART PIECES
 router.get('/art_piece/all', (req, res) => {
     ArtPiece.findAll()
-        .then(resp => res.status(200).json({ ok: true, data: resp }))
-        .catch(err => res.status(400).json({ ok: false, data: err }))
+        .then(resp => res.status(200).json({
+            ok: true,
+            data: resp
+        }))
+        .catch(err => res.status(400).json({
+            ok: false,
+            data: err
+        }))
 })
 
 //GET AN ART PIECE BY IT'S ID
 router.get('/piece/:id', (req, res) => {
-    const { id } = req.params;
-    ArtPiece.findOne({ where: { id } })
-        .then(resp => res.status(200).json({ ok: true, data: resp }))
-        .catch(err => res.status(400).json({ ok: false, data: err }))
+    const {
+        id
+    } = req.params;
+    ArtPiece.findOne({
+            where: {
+                id
+            }
+        })
+        .then(resp => res.status(200).json({
+            ok: true,
+            data: resp
+        }))
+        .catch(err => res.status(400).json({
+            ok: false,
+            data: err
+        }))
 })
 
 //FINDS THE CREATOR AND THE CURRENT OWNER OF ALL PIECES
 router.get('/users_pieces/all', (req, res) => {
     UserPiece.findAll()
-        .then(resp => res.status(200).json({ ok: true, data: resp }))
-        .catch(err => res.status(400).json({ ok: false, data: err }))
+        .then(resp => res.status(200).json({
+            ok: true,
+            data: resp
+        }))
+        .catch(err => res.status(400).json({
+            ok: false,
+            data: err
+        }))
 })
 
 //FINDS THE CREATOR AND THE CURRENT OWNER OF A PIECE
 router.get('/users_pieces/:id', (req, res) => {
-    const { id } = req.params;
-    UserPiece.findOne({ where: { id_piece: id } })
-        .then(resp => res.status(200).json({ ok: true, data: resp }))
-        .catch(err => res.status(400).json({ ok: false, data: err }))
+    const {
+        id
+    } = req.params;
+    UserPiece.findOne({
+            where: {
+                id_piece: id
+            }
+        })
+        .then(resp => res.status(200).json({
+            ok: true,
+            data: resp
+        }))
+        .catch(err => res.status(400).json({
+            ok: false,
+            data: err
+        }))
 })
 
 //GET GATEGORIES OF A PICE
 router.get('/piece/category/:id', (req, res) => {
-    const { id } = req.params;
-    CategoryPiece.findAll({ where: { id_piece: id } })
+    const {
+        id
+    } = req.params;
+    CategoryPiece.findAll({
+            where: {
+                id_piece: id
+            }
+        })
         .then(resp => {
             let idCategories = resp.map((cat) => (cat.id_category));
-            Category.findAll({ where: { id: idCategories } })
-                .then(response => res.status(200).json({ ok: true, data: response }))
-                .catch(err => res.status(400).json({ ok: false, data: err }))
+            Category.findAll({
+                    where: {
+                        id: idCategories
+                    }
+                })
+                .then(response => res.status(200).json({
+                    ok: true,
+                    data: response
+                }))
+                .catch(err => res.status(400).json({
+                    ok: false,
+                    data: err
+                }))
         })
 
 })
 
 //GET COLLECTION OF A PIECE
 router.get('/piece/collection/:id', (req, res) => {
-    const { id } = req.params;
+    const {
+        id
+    } = req.params;
     console.log(id);
-    Collection.findOne({ where: { id: id } })
-        .then(resp => res.status(200).json({ ok: true, data: resp }))
-        .catch(err => res.status(400).json({ ok: false, data: err }))
+    Collection.findOne({
+            where: {
+                id: id
+            }
+        })
+        .then(resp => res.status(200).json({
+            ok: true,
+            data: resp
+        }))
+        .catch(err => res.status(400).json({
+            ok: false,
+            data: err
+        }))
 })
 
 //CREATE A NEW ART PIECE
@@ -109,7 +189,9 @@ router.post('/new', async (req, res) => {
 
             transaction = await sequelize.transaction();
 
-            await ArtPiece.create(piece, { transaction })
+            await ArtPiece.create(piece, {
+                    transaction
+                })
                 .then(resp => {
                     userPiece = {
                         id_creator: req.body.idUser,
@@ -129,21 +211,31 @@ router.post('/new', async (req, res) => {
                 })
                 .catch(err => console.log(err))
 
-            await UserPiece.create(userPiece, { transaction })
+            await UserPiece.create(userPiece, {
+                transaction
+            })
 
-            await CategoryPiece.create(catPiece, { transaction })
+            await CategoryPiece.create(catPiece, {
+                transaction
+            })
             //ADD COLLECTION
             // await CollectionPiece.create(colPiece, { transaction })
 
             await transaction.commit();
 
-            res.status(200).json({ ok: true, data: "Insertado correctamente" })
+            res.status(200).json({
+                ok: true,
+                data: "Insertado correctamente"
+            })
 
         } catch (error) {
             console.log(error)
             // Rollback transaction 
             if (transaction) await transaction.rollback();
-            res.status(400).json({ ok: false, data: "Error al insertar, revisa los campos" })
+            res.status(400).json({
+                ok: false,
+                data: "Error al insertar, revisa los campos"
+            })
         }
     })
 })
@@ -151,7 +243,10 @@ router.post('/new', async (req, res) => {
 //editando
 router.post('/edit', (req, res) => {
     //Se recojen los datos enviados en el body
-    const { id, idUser } = req.body;
+    const {
+        id,
+        idUser
+    } = req.body;
 
     //Se monta un objeto con los datos que queremos que se actualizen en bd, en este caso el current_owner
     let obra = {
@@ -161,7 +256,11 @@ router.post('/edit', (req, res) => {
     let flag = false;
 
     //Se busca la pieza y se le pasa el objeto creado para que actualice el campo que tiene informado
-    UserPiece.findOne({ where: { id_piece: id } })
+    UserPiece.findOne({
+            where: {
+                id_piece: id
+            }
+        })
         .then(userPiece => {
             //Si se esta intentando comprar una pieza que no es suya, se actualiza y se compra(mas adelante se mirara que haya dinero y demas)
             if (userPiece.dataValues.id_creator != idUser) {
@@ -172,7 +271,10 @@ router.post('/edit', (req, res) => {
                 reject();
             }
         })
-        .then(result => res.status(200).json({ ok: true, data: result }))
+        .then(result => res.status(200).json({
+            ok: true,
+            data: result
+        }))
         .catch(err => {
             //Para controlar el error, con el flag podemos saber si es error de BD, servidor o que esta intentando comprar su propia obra, si es asi ponemos un tetxo predeterminado y un codigo de error
             if (flag) {
@@ -181,8 +283,45 @@ router.post('/edit', (req, res) => {
             } else {
                 estatus = 400;
             }
-            return res.status(estatus).json({ ok: false, data: err })
+            return res.status(estatus).json({
+                ok: false,
+                data: err
+            })
         })
 })
 //fin editando
+
+// DELETE ART BY ID
+
+router.delete('/art/piece/:id', async (req, res) => {
+    try {
+        const {
+            id
+        } = req.params;
+        const artPiece = await ArtPiece.findOne({
+            where: {
+                id
+            }
+        });
+        if (!artPiece) {
+            return res.status(404).json({
+                ok: false,
+                data: 'No se encontró el arte'
+            });
+        }
+        await artPiece.destroy();
+        res.status(200).json({
+            ok: true,
+            data: 'El arte fue eliminado correctamente'
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(400).json({
+            ok: false,
+            data: error.message
+        });
+    }
+});
+
+
 module.exports = router;
